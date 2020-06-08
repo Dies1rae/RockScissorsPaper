@@ -2,15 +2,28 @@
 #include<string>
 #include<ctime>
 #include<Windows.h>
+#include <conio.h>
 using namespace std;
 
-/* Macro definition for functions defining a program header */
+
+
+// ----------------DIES_IRAE------------KEYB CLEANER
+void clearKeyboardBuffer() {
+	while (_kbhit()) {
+		_getche();
+	}
+}
+// ----------------DIES_IRAE------------KEYB CLEANER
+
+
+
+/* Макроопределение для функции, задающей заголовок программы */
 #define SetCmdTitle SetConsoleTitleA
 
-/* Function prototype for console cleaning */
+/* Прототип функции для очистки консоли */
 inline void ClearConsoleLog(void);
 
-/* Random gesture generation for computer */
+/* Генерация случайного жеста для компьютера */
 int GenerateRandomSign(const int MIN_RANGE = 1, const int MAX_RANGE = 3)
 {
 	srand(static_cast<unsigned int>(time(NULL)));
@@ -19,7 +32,7 @@ int GenerateRandomSign(const int MIN_RANGE = 1, const int MAX_RANGE = 3)
 	return randomSign;
 }
 
-/* The structure that stores the variables that are responsible for the names of game gestures */
+/* Структура, хранящая переменные, которые отвечают за наименования игровых жестов */
 struct MySign
 {
 	const string strRock = "ROCK!";
@@ -28,24 +41,33 @@ struct MySign
 };
 MySign ms;
 
-/* The structure that stores the variables that are responsible for the players */
+/* Структура, хранящая переменные, которые отвечают за игроков */
 struct Players
 {
-	int user = 0;
+	int user;
 	string username;
-	int computer = 0;
+	int computer;
+	Players() {
+		this->user = 0;
+		this->username = "";
+		this->computer = 0;
+	}
+	void set_username(string NAME) {
+		this->username = NAME;
+	}
 };
-Players players;
+Players* players = new Players();
 
-/* Drawing a table listing game gestures */
-void DrawTable(void)
+
+/* Отрисовка таблицы с перечислением игровых жестов */
+void DrawTable()
 {
 	cout << "\t\t\t\t\t +-------------------------------+" << endl;
 	cout << "\t\t\t\t\t | 1.Rock | 2.Paper | 3.Scissors |" << endl;
 	cout << "\t\t\t\t\t +-------------------------------+" << endl;
 }
 
-/* Player Turn */
+/* Ход игрока */
 int UserThrow(int& user)
 {
 	switch (user)
@@ -67,7 +89,7 @@ int UserThrow(int& user)
 	return user;
 }
 
-/* Computer running */
+/* Ход компьютера */
 int ComputerThrow(int& computer)
 {
 	computer = GenerateRandomSign();
@@ -90,36 +112,36 @@ int ComputerThrow(int& computer)
 	return computer;
 }
 
-/* Winner selection */
+/* Выбор победителя */
 void SelectWinner(int& user, int& computer, string* username)
 {
 	if (user == computer)
 		cout << "\t\t\t\t\t\t DRAW!" << endl;
 	else if (user == 1 && computer == 3)
 		cout << "\t\t\t\t\t\t " << (*username) << " WIN!" << endl;
-	else if (user == 3 && computer == 2) 
+	else if (user == 3 && computer == 2)
 		cout << "\t\t\t\t\t\t " << (*username) << " WIN!" << endl;
-	else if (user == 2 && computer == 1) 
+	else if (user == 2 && computer == 1)
 		cout << "\t\t\t\t\t\t " << (*username) << " WIN!" << endl;
-	else 
+	else
 		cout << "\t\t\t\t\t\t Computer WINS!" << endl;
 }
 
-/* User information */
-void DrawInfoAboutUser(void)
+/* Информация о пользователе */
+void DrawInfoAboutUser()
 {
-	/* User data entry */
+	/* Ввод данных о пользователе */
 	cout << "Hey, what's your name?" << endl;
 	cout << "My name is ";
-	cin >> players.username;
-
-	ClearConsoleLog();
-	cout << "You are welcome, " << players.username << "!\nEnjoy the game!" << endl;
+	string tmpUN;
+	cin >> tmpUN;
+	players->set_username(tmpUN);
+	cout << "You are welcome, " << players->username << "!\nEnjoy the game!" << endl;
 	cout << endl;
 }
 
-/* Game data initialization */
-void Initialization(void)
+/* Инициализация игровых данных */
+void Initialization()
 {
 	/* The choice of the beginning of the game or exit from the program */
 	cout << "You are ready to start the game?" << endl;
@@ -133,19 +155,22 @@ void Initialization(void)
 			ClearConsoleLog();
 
 			/* Player Turn */
-			players.user = 0;
+			players->user = 0;
+			//----------------DIES_IRAE------------
+			clearKeyboardBuffer();
+			// ----------------DIES_IRAE------------
 			DrawTable();
 			cout << "Choose: ";
-			cin >> players.user;
-			UserThrow(players.user);
+			cin >> players->user;
+			UserThrow(players->user);
 
 			cout << endl;
 
 			/* Computer running */
-			players.computer = 0;
+			players->computer = 0;
 			DrawTable();
 			cout << "Computer choose: ";
-			ComputerThrow(players.computer);
+			ComputerThrow(players->computer);
 			break;
 		}
 		else if (GetAsyncKeyState(VK_F2) != 0)
@@ -161,20 +186,19 @@ void Initialization(void)
 	}
 
 	/* Selection of the winner according to the outcome of the game */
-	SelectWinner(players.user, players.computer, &players.username);
+	SelectWinner(players->user, players->computer, &players->username);
 }
-
-/* Program entry point */
 int main()
 {
-	/* Set the title for the window */
+
+	/* Устанавливаем заголовок (название) для окна */
 	SetCmdTitle("ROCK - PAPER - SCISSORS");
 
-	/* Initialization of all data and their processing */
+	/* Инициализация всех данных и их обработки */
 	DrawInfoAboutUser();
 	Initialization();
 
-	/* Choice for the user to continue / end the game */
+	/* Выбор для пользователя о продолжении / окончании игры */
 	while (true)
 	{
 		string choice;
@@ -186,17 +210,17 @@ int main()
 
 		if (choice != "YES" && choice != "yes" && choice != "Yes")
 		{
-			/* Clear the screen from past data */
+			/* Очистка экрана от прошлых данных */
 			ClearConsoleLog();
 
-			/* Exit from the program */
+			/* Выход из программы */
 			cout << "Thank you for the game! \n See you later!" << endl;
 			exit(EXIT_SUCCESS);
 			break;
 		}
 		else
 		{
-			/* Clear the screen from past data */
+			/* Очистка экрана от прошлых данных */
 			ClearConsoleLog();
 			Initialization();
 			break;
@@ -207,7 +231,7 @@ int main()
 	return NULL;
 }
 
-/* Function for cleaning the console */
+/* Функция для очистки консоли */
 inline void ClearConsoleLog(void)
 {
 	system("cls");
